@@ -1,4 +1,3 @@
-Here’s the revised **README.md** with explicit instructions about role updates, emphasizing that only an admin can change user roles. The `update-role` functionality has been highlighted in a dedicated section.
 
 ---
 
