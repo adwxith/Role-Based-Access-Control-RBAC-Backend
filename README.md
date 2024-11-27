@@ -1,194 +1,308 @@
+Here’s the revised **README.md** with explicit instructions about role updates, emphasizing that only an admin can change user roles. The `update-role` functionality has been highlighted in a dedicated section.
 
-# User Authentication System
+---
+
+# Role-Based-Access-Control (RBAC) Backend
+
+This backend application implements Role-Based Access Control (RBAC) for managing user roles and authentication. Built with Node.js and PostgreSQL, it uses JWT for authentication and Docker for containerization.
+
+---
 
 ## Table of Contents
-
-- [Description](#description)
-- [Features](#features)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [Using .env for Secure Configuration](#using-env-for-secure-configuration)
-  - [Without .env for Basic Configuration](#without-env-for-basic-configuration)
-  - [Creating Tables with Correct Constraints](#creating-tables-with-correct-constraints)
-- [Usage](#usage)
-- [Contributing](#contributing)
+- [Installation](#installation)
+- [Setup](#setup)
+  - [Environment Variables](#environment-variables)
+  - [Database Setup](#database-setup)
+  - [Roles and Permissions](#roles-and-permissions)
+- [Docker Setup](#docker-setup)
+- [API Documentation](#api-documentation)
+- [Role Management](#role-management)
+- [API Testing with Postman](#api-testing-with-postman)
+- [Best Practices](#best-practices)
 - [License](#license)
 
-## Description
-
-This project is a user authentication system built with Node.js, Express, MySQL, and bcrypt for password hashing. It provides endpoints for user registration and login. You can choose to use a secure configuration using a `.env` file for sensitive data or a basic configuration without it.
-
-## Features
-
-- User registration with password hashing
-- User login with secure password verification
-- Protection of sensitive data using environment variables
-- Database connection with minimal permissions for added security
+---
 
 ## Prerequisites
+Ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v14 or higher)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-Before you begin, ensure you have met the following requirements:
+---
 
-- Node.js installed
-- MySQL database installed
-- A text editor or IDE of your choice
-
-## Getting Started
-
-### Using .env for Secure Configuration
+## Installation
 
 1. Clone the repository:
-
    ```bash
-   git clone https://github.com/adwxith/expressJs-user-authentication.git
+   git clone git@github.com:adwxith/Role-Based-Access-Control-RBAC-Backend.git
+   cd Role-Based-Access-Control-RBAC-Backend
    ```
 
-2. Install the project dependencies:
-
+2. Install project dependencies:
    ```bash
-   cd your-repo
    npm install
    ```
 
-3. Install `nodemon` and `dotenv` as development dependencies:
+---
 
+## Setup
+
+### Environment Variables
+Create a `.env` file in the root directory with the following:
+```plaintext
+ACCESS_SECRET_KEY=your-secret-key
+```
+
+**Note:** 
+- Database credentials are defined in `docker-compose.yml` and do not need to be specified here.
+- Change `ACCESS_SECRET_KEY` to a strong, unique value.
+
+---
+
+### Database Setup
+
+1. Start PostgreSQL using Docker Compose:
    ```bash
-   npm i nodemon dotenv --save-dev
+   docker-compose up -d
    ```
 
-4. Create a `.env` file in the project root and add the following configuration:
-
-   ```
-   DB_HOST=your-db-host
-   DB_USER=your-db-user
-   DB_PASSWORD=your-db-password
-   DB_DATABASE=your-db-name
-   ```
-
-   Replace `your-db-host`, `your-db-user`, `your-db-password`, and `your-db-name` with your actual database information. Ensure this file is not committed to version control for security.
-
-5. To enhance the security of your MySQL database, it's recommended to create a new user with limited privileges. Follow these steps to create the new user:
-
-   1. Open your MySQL database management tool (e.g., phpMyAdmin).
-
-   2. Click on the "Administration" tab on the top left.
-
-   3. Navigate to "Users and Privileges."
-
-   4. Click the "(ADD ACCOUNT)" button on the bottom.
-
-   5. Fill in the user details as follows:
-      - **Login Name:** newuser
-      - **Authentication Type:** Standard
-      - **Limit to Hosts Matching:** localhost
-      - **Password:** password1#
-
-   6. Under the "Global Privileges" or "Database-Specific Privileges" section, assign limited privileges to this user, such as:
-      - SELECT
-      - INSERT
-      - DELETE
-
-   7. Ensure you do not assign Database Administrator privileges to the new user.
-
-6. Add `.env` to `index.js`:
-
-   ```javascript
-   require("dotenv").config()
-   ```
-
-7. Start the application with `node`:
-
+2. Find the PostgreSQL container ID:
    ```bash
-   node index.js
+   docker ps
    ```
 
-   This will run your application with the secure configuration and automatic code reloading.
-
-### Without .env for Basic Configuration
-
-1. Clone the repository:
-
+3. Access the PostgreSQL container:
    ```bash
-   git clone https://github.com/adwxith/expressJs-user-authentication.git
+   docker exec -it <postgres_container_id> psql -U postgres -d authdb
    ```
 
-2. Install the project dependencies:
-
-   ```bash
-   cd your-repo
-   npm install
-   ```
-
-3. Adjust the server configuration in the `index.js` file. Update the following details directly in the code:
-
-   ```javascript
-   const db = mysql.createConnection({
-     host: 'your-db-host',
-     user: 'your-db-user',
-     password: 'your-db-password',
-     database: 'your-db-name'
-   });
-   ```
-
-4. Start the application:
-
-   ```bash
-   node index.js
-   ```
-
-   This will run your application with the basic configuration.
-
-
-## Creating Tables with Correct Constraints
-
-To ensure data integrity and security, it's essential to create your database tables with the correct constraints. Follow these steps to create the necessary tables with appropriate constraints:
-
-1. Open your MySQL database management tool (e.g., phpMyAdmin).
-
-2. Create a new database for your application if you haven't already. You can use a command like this in your MySQL client to create a new database:
-
+4. Create the `users` table:
    ```sql
-   CREATE DATABASE your-db-name;
-   ```
-
-   Replace `your-db-name` with your desired database name.
-
-3. Once you have your database, create the necessary tables. In your Node.js application code, you can execute SQL queries to create tables. For example, you can create a `users` table for your authentication system like this:
-
-   ```sql
-   CREATE TABLE auth (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     username VARCHAR(255) NOT NULL,
-     password VARCHAR(255) NOT NULL
+   CREATE TABLE users (
+       id SERIAL PRIMARY KEY,
+       username VARCHAR(255) NOT NULL,
+       password VARCHAR(255) NOT NULL,
+       role VARCHAR(50) NOT NULL
    );
    ```
 
-   This SQL query creates a `auth` table with constraints such as a primary key, not-null fields, and timestamps for data integrity and security.
+---
 
+### Roles and Permissions
 
-## Usage
+Roles and their associated permissions are defined in `roles.js`:
+```javascript
+const roles = {
+    admin: ['dashboard-edit', 'read', 'write', 'delete'],
+    moderator: ['read', 'write'],
+    user: ['read']
+};
 
-1. The server will be running on port 3000 by default. You can change this in the code if needed.
+module.exports = roles;
+```
 
-2. You can now use the `/createUser` and `/login` endpoints for user registration and login.
+**Admin Role Setup During Development:**
+- During development, you can create an admin user using the `/createUser` endpoint. Use a tool like Postman to make a `POST` request with the following body:
+   ```json
+   {
+       "username": "adminUser",
+       "password": "adminPassword",
+       "role": "admin"
+   }
+   ```
 
-## Contributing
+**Default Role for Users:**
+- After development, the `createUser` API will automatically set the role to `user` by default. Any role beyond `user` can only be assigned by an admin through the `/admin/update-role` API.
 
-Contributions are welcome! Here's how you can contribute:
+---
 
-1. Fork the project.
+## Docker Setup
 
-2. Create your feature branch: `git checkout -b feature-name`.
+### Building and Running the Docker Containers
 
-3. Commit your changes: `git commit -m 'Add some feature'.
+1. Build the Docker image:
+   ```bash
+   docker build -t rbac-backend .
+   ```
 
-4. Push to the branch: `git push origin feature-name'.
+2. Start the application and PostgreSQL database:
+   ```bash
+   docker-compose up -d
+   ```
 
-5. Create a new Pull Request.
+3. Stop the containers:
+   ```bash
+   docker-compose down
+   ```
+
+---
+
+## API Documentation
+
+### 1. Login - `/login` (POST)
+**Description:** Authenticates a user and generates JWT tokens.
+
+#### Request Body:
+```json
+{
+  "username": "exampleUser",
+  "password": "userPassword"
+}
+```
+
+---
+
+### 2. Create User - `/createUser` (POST)
+**Description:** Registers a new user. The role is set to `user` by default after development, but during development, you can assign roles explicitly.
+
+#### Request Body:
+```json
+{
+  "username": "newUser",
+  "password": "newUserPassword",
+  "role": "user"  
+}
+```
+
+---
+
+### 3. Role-Based Routes
+
+- **Admin Route** - `/admin` (GET): Requires `dashboard-edit` permission.
+  - Response: List of all users.
+- **Moderator Route** - `/moderator` (GET): Requires `write` permission.
+- **User Route** - `/user` (GET): Requires `read` permission.
+- **Profile Route** - `/profile` (GET): Accessible by all authenticated users.
+
+---
+
+### 4. Logout - `/logout` (POST)
+**Description:** Logs out the user and adds the JWT token to a blacklist.
+
+#### Request Header:
+```plaintext
+Authorization: Bearer <access_token>
+```
+
+---
+
+## Role Management
+
+### Updating a User's Role - `/admin/update-role` (PUT)
+**Description:** Allows an admin to update the role of a specific user. Only users with the `admin` role can perform this action.
+
+#### Request Body:
+```json
+{
+  "userId": 1,
+  "newRole": "moderator"
+}
+```
+
+#### Headers:
+```plaintext
+Authorization: Bearer <admin_access_token>
+```
+
+#### Example Response:
+- **Success:**
+  ```json
+  {
+    "message": "User role updated successfully",
+    "updatedUser": {
+      "id": 1,
+      "username": "exampleUser",
+      "role": "moderator"
+    }
+  }
+  ```
+- **Failure (Not Authorized):**
+  ```json
+  {
+    "message": "Access denied. Only admins can perform this action."
+  }
+  ```
+
+---
+
+## API Testing with Postman
+
+1. **Login**:
+   - **Endpoint:** `http://localhost:3000/login`
+   - **Method:** `POST`
+   - **Body:**
+     ```json
+     {
+       "username": "exampleUser",
+       "password": "userPassword"
+     }
+     ```
+
+2. **Create User**:
+   - **Endpoint:** `http://localhost:3000/createUser`
+   - **Method:** `POST`
+   - **Body:**
+     ```json
+     {
+       "username": "newUser",
+       "password": "newUserPassword",
+       "role": "user"  
+     }
+     ```
+
+3. **Update Role**:
+   - **Endpoint:** `http://localhost:3000/admin/update-role`
+   - **Method:** `PUT`
+   - **Body:**
+     ```json
+     {
+       "userId": 1,
+       "newRole": "moderator"
+     }
+     ```
+   - **Header:** 
+     ```plaintext
+     Authorization: Bearer <admin_access_token>
+     ```
+
+4. **Admin Route**:
+   - **Endpoint:** `http://localhost:3000/admin`
+   - **Method:** `GET`
+   - **Header:** 
+     ```plaintext
+     Authorization: Bearer <admin_access_token>
+     ```
+
+5. **Logout**:
+   - **Endpoint:** `http://localhost:3000/logout`
+   - **Method:** `POST`
+   - **Header:** 
+     ```plaintext
+     Authorization: Bearer <access_token>
+     ```
+
+---
+
+## Best Practices
+
+1. **Environment Variables**:
+   - Never upload `.env` files to version control in production.
+   - Use secure methods like deployment secrets for sensitive keys.
+
+2. **Role Management**:
+   - Restrict role updates to admins only.
+   - Regularly audit user roles and permissions.
+
+3. **ACCESS_SECRET_KEY**:
+   - Use a unique and strong key for `ACCESS_SECRET_KEY`.
+
+---
 
 ## License
+This project is licensed under the MIT License.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+--- 
 
-
-
+Let me know if more details are required!
