@@ -6,6 +6,13 @@
 This backend application implements Role-Based Access Control (RBAC) for managing user roles and authentication. Built with Node.js and PostgreSQL, it uses JWT for authentication and Docker for containerization.
 
 ---
+**⚠️ Precautions ⚠️**
+
+- **Access Tokens:** Access tokens are returned in API responses for easier testing and reference during project development. **This is not a best practice for production environments.** Always ensure tokens are handled securely and never exposed unnecessarily.
+
+- **Environment Files:** Including sensitive files like `.env` or embedding environment variables in `docker-compose.yml` is only for simplicity during development. **Avoid committing such files to version control** and use secure methods for storing environment variables in production (e.g., deployment secrets or environment management tools).
+
+---
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
